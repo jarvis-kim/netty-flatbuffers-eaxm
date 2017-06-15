@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="flatbuffers.js"></script>
+    <script src="hello_generated.js"></script>
+    <script>
+        window.onload = function() {
+            document.getElementById('btn').onclick = function () {
+                var webSocket = new WebSocket("ws://localhost:7000/hello");
+                webSocket.binaryType = 'arraybuffer';
+
+                webSocket.onopen = function () {
+                    var Hello = kr.co.jarvisk.flatbuffers.protocol.Hello;
+
+                    var fbb = new flatbuffers.Builder(0);
+                    var messageOffset = fbb.createString("hello server.");
+                    var nameOffset = fbb.createString("jarvis");
+                    Hello.startHello(fbb);
+                    Hello.addMessage(fbb, messageOffset);
+                    Hello.addName(fbb, nameOffset);
+                    Hello.addCount(fbb, 3);
+                    var endOffset = Hello.endHello(fbb);
+                    fbb.finish(endOffset);
+                    var byteBuffer = fbb.dataBuffer();
+
+                    var unit8Array = byteBuffer.bytes();
+                    var data = unit8Array.subarray(byteBuffer.position(), byteBuffer.capacity());
+
+                    var hello = Hello.getRootAsHello(byteBuffer);
+                    console.log(hello.name());
+                    console.log(hello.message());
+                    console.log(hello.count());
+
+                    console.log(data);
+
+                    webSocket.send(data);
+                };
+
+            };
+        }
+
+
+    </script>
+</head>
+<body>
+<button id="btn">send server</button>
+
+</body>
+</html>

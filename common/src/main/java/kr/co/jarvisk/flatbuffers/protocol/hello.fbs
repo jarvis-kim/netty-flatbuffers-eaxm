@@ -1,0 +1,9 @@
+namespace kr.co.jarvisk.flatbuffers.protocol;
+
+table Hello {
+    message:string;
+    name:string;
+    count:int;
+}
+
+root_type Hello;
